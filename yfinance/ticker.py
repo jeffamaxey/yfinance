@@ -38,15 +38,13 @@ from .base import TickerBase
 class Ticker(TickerBase):
 
     def __repr__(self):
-        return 'yfinance.Ticker object <%s>' % self.ticker
+        return f'yfinance.Ticker object <{self.ticker}>'
 
     def _download_options(self, date=None, proxy=None):
         if date is None:
-            url = "{}/v7/finance/options/{}".format(
-                self._base_url, self.ticker)
+            url = f"{self._base_url}/v7/finance/options/{self.ticker}"
         else:
-            url = "{}/v7/finance/options/{}?date={}".format(
-                self._base_url, self.ticker, date)
+            url = f"{self._base_url}/v7/finance/options/{self.ticker}?date={date}"
 
         # setup proxy in requests format
         if proxy is not None:

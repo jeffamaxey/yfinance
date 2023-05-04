@@ -28,17 +28,13 @@ from . import Ticker, multi
 class Tickers():
 
     def __repr__(self):
-        return 'yfinance.Tickers object <%s>' % ",".join(self.symbols)
+        return f'yfinance.Tickers object <{",".join(self.symbols)}>'
 
     def __init__(self, tickers):
         tickers = tickers if isinstance(
             tickers, list) else tickers.replace(',', ' ').split()
         self.symbols = [ticker.upper() for ticker in tickers]
-        ticker_objects = {}
-
-        for ticker in self.symbols:
-            ticker_objects[ticker] = Ticker(ticker)
-
+        ticker_objects = {ticker: Ticker(ticker) for ticker in self.symbols}
         self.tickers = ticker_objects
         # self.tickers = _namedtuple(
         #     "Tickers", ticker_objects.keys(), rename=True

@@ -87,7 +87,7 @@ def download(tickers, start=None, end=None, actions=False, threads=True,
 
     tickers = _tickers_
 
-    tickers = list(set([ticker.upper() for ticker in tickers]))
+    tickers = list({ticker.upper() for ticker in tickers})
 
     if progress:
         shared._PROGRESS_BAR = utils.ProgressBar(len(tickers), 'completed')
@@ -111,9 +111,8 @@ def download(tickers, start=None, end=None, actions=False, threads=True,
         while len(shared._DFS) < len(tickers):
             _time.sleep(0.01)
 
-    # download synchronously
     else:
-        for i, ticker in enumerate(tickers):
+        for ticker in tickers:
             data = _download_one(ticker, period=period, interval=interval,
                                  start=start, end=end, prepost=prepost,
                                  actions=actions, auto_adjust=auto_adjust,

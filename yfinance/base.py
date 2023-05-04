@@ -94,11 +94,9 @@ class TickerBase():
         if self._fundamentals:
             return
 
-        ticker_url = "{}/{}".format(self._scrape_url, self.ticker)
+        ticker_url = f"{self._scrape_url}/{self.ticker}"
 
-        # get info and sustainability
-        data = utils.get_json(ticker_url, proxy, self.session)
-        return data
+        return utils.get_json(ticker_url, proxy, self.session)
 
     def history(self, period="1mo", interval="1d",
                 start=None, end=None, prepost=False, actions=True,
@@ -178,7 +176,7 @@ class TickerBase():
             proxy = {"https": proxy}
 
         # Getting data from json
-        url = "{}/v8/finance/chart/{}".format(self._base_url, self.ticker)
+        url = f"{self._base_url}/v8/finance/chart/{self.ticker}"
 
         session = self.session or _requests
 
@@ -208,11 +206,11 @@ class TickerBase():
 
         err_msg = "No data found for this date range, symbol may be delisted"
 
-        if data is None or not type(data) is dict or 'status_code' in data.keys():
+        if data is None or type(data) is not dict or 'status_code' in data.keys():
             shared._DFS[self.ticker] = utils.empty_df()
             shared._ERRORS[self.ticker] = err_msg
             if "many" not in kwargs and debug_mode:
-                print('- %s: %s' % (self.ticker, err_msg))
+                print(f'- {self.ticker}: {err_msg}')
             return utils.empty_df()
 
         if "chart" in data and data["chart"]["error"]:
@@ -220,15 +218,15 @@ class TickerBase():
             shared._DFS[self.ticker] = utils.empty_df()
             shared._ERRORS[self.ticker] = err_msg
             if "many" not in kwargs and debug_mode:
-                print('- %s: %s' % (self.ticker, err_msg))
+                print(f'- {self.ticker}: {err_msg}')
             return shared._DFS[self.ticker]
 
         elif "chart" not in data or data["chart"]["result"] is None or \
-                not data["chart"]["result"]:
+                    not data["chart"]["result"]:
             shared._DFS[self.ticker] = utils.empty_df()
             shared._ERRORS[self.ticker] = err_msg
             if "many" not in kwargs and debug_mode:
-                print('- %s: %s' % (self.ticker, err_msg))
+                print(f'- {self.ticker}: {err_msg}')
             return shared._DFS[self.ticker]
 
         # parse quotes
@@ -238,7 +236,7 @@ class TickerBase():
             shared._DFS[self.ticker] = utils.empty_df()
             shared._ERRORS[self.ticker] = err_msg
             if "many" not in kwargs and debug_mode:
-                print('- %s: %s' % (self.ticker, err_msg))
+                print(f'- {self.ticker}: {err_msg}')
             return shared._DFS[self.ticker]
 
         # 2) fix weired bug with Yahoo! - returning 60m for 30m bars
@@ -268,13 +266,13 @@ class TickerBase():
                 quotes = utils.back_adjust(quotes)
         except Exception as e:
             if auto_adjust:
-                err_msg = "auto_adjust failed with %s" % e
+                err_msg = f"auto_adjust failed with {e}"
             else:
-                err_msg = "back_adjust failed with %s" % e
+                err_msg = f"back_adjust failed with {e}"
             shared._DFS[self.ticker] = utils.empty_df()
             shared._ERRORS[self.ticker] = err_msg
             if "many" not in kwargs and debug_mode:
-                print('- %s: %s' % (self.ticker, err_msg))
+                print(f'- {self.ticker}: {err_msg}')
 
         if rounding:
             quotes = _np.round(quotes, data[
@@ -297,9 +295,7 @@ class TickerBase():
 
         if params["interval"][-1] == "m":
             df.index.name = "Datetime"
-        elif params["interval"] == "1h":
-            pass
-        else:
+        elif params["interval"] != "1h":
             df.index = _pd.to_datetime(df.index.date)
             if tz is not None:
                 df.index = df.index.tz_localize(tz)
